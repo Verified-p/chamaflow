@@ -1,0 +1,349 @@
+
+{% extends "base.html" %}
+
+{% block title %}Rotation Schedule | ChamaFlow{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <a href="{% url 'savings:group_detail' group.pk %}"
+               class="text-decoration-none text-muted">
+                <i class="bi bi-arrow-left"></i> Back to Group
+            </a>
+
+            <h2 class="fw-bold mt-3 mb-1">Rotation Schedule</h2>
+
+            <p class="text-muted mb-0">
+                Follow the payout order for {{ group.name }}.
+            </p>
+        </div>
+
+        <a href="{% url 'savings:payouts' group.pk %}"
+           class="btn btn-primary">
+            <i class="bi bi-wallet2 me-2"></i>
+            View Payouts
+        </a>
+
+    </div>
+
+    <!-- Group Summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-2">Savings Group</p>
+                            <h5 class="fw-bold mb-0">{{ group.name }}</h5>
+                        </div>
+
+                        <i class="bi bi-people-fill fs-2 text-primary"></i>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-2">Contribution Amount</p>
+
+                            <h5 class="fw-bold mb-1">
+                                KSh {{ group.contribution_amount|floatformat:2 }}
+                            </h5>
+
+                            <small class="text-muted">
+                                {{ group.get_contribution_frequency_display }}
+                            </small>
+                        </div>
+
+                        <i class="bi bi-cash-stack fs-2 text-success"></i>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-2">Total Rotation Turns</p>
+
+                            <h3 class="fw-bold mb-1">
+                                {{ rotation_turns.count }}
+                            </h3>
+
+                            <small class="text-muted">
+                                One turn per member
+                            </small>
+                        </div>
+
+                        <i class="bi bi-arrow-repeat fs-2 text-primary"></i>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Rotation Explanation -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex gap-3">
+
+                <div>
+                    <i class="bi bi-info-circle-fill text-primary fs-3"></i>
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold">How the Rotation Works</h5>
+
+                    <p class="text-muted mb-0">
+                        Every active member contributes the agreed amount
+                        according to the group's contribution frequency.
+                        At each scheduled turn, one member receives the
+                        accumulated contributions. The rotation continues
+                        until every member has received their turn.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Rotation Schedule -->
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-header bg-white border-0 p-4">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                <div>
+                    <h5 class="fw-bold mb-1">Payout Order</h5>
+
+                    <p class="text-muted small mb-0">
+                        Members are listed according to their scheduled turns.
+                    </p>
+                </div>
+
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                    {{ rotation_turns.count }} Turn(s)
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if rotation_turns %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="ps-4">Turn</th>
+                                <th>Recipient</th>
+                                <th>Phone Number</th>
+                                <th>Scheduled Date</th>
+                                <th>Expected Payout</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for turn in rotation_turns %}
+
+                                <tr>
+
+                                    <!-- Turn Number -->
+                                    <td class="ps-4">
+
+                                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+                                            #{{ turn.turn_number }}
+                                        </span>
+
+                                    </td>
+
+                                    <!-- Recipient -->
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            {{ turn.membership.user.get_full_name|default:turn.membership.user.username }}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            {{ turn.membership.user.username }}
+                                        </small>
+
+                                    </td>
+
+                                    <!-- Phone Number -->
+                                    <td>
+                                        {{ turn.membership.user.phone_number|default:"Not provided" }}
+                                    </td>
+
+                                    <!-- Scheduled Date -->
+                                    <td>
+                                        {{ turn.scheduled_date|date:"d M Y" }}
+                                    </td>
+
+                                    <!-- Expected Amount -->
+                                    <td>
+                                        <span class="fw-semibold text-success">
+                                            KSh {{ turn.expected_amount|floatformat:2 }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Turn Status -->
+                                    <td>
+
+                                        {% if turn.status == "completed" %}
+
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Completed
+                                            </span>
+
+                                        {% elif turn.status == "current" %}
+
+                                            <span class="badge bg-primary">
+                                                <i class="bi bi-arrow-right-circle me-1"></i>
+                                                Current Turn
+                                            </span>
+
+                                        {% elif turn.status == "upcoming" %}
+
+                                            <span class="badge bg-warning text-dark">
+                                                Upcoming
+                                            </span>
+
+                                        {% elif turn.status == "skipped" %}
+
+                                            <span class="badge bg-secondary">
+                                                Skipped
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-secondary">
+                                                {{ turn.get_status_display }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <!-- Empty State -->
+                <div class="text-center py-5 px-3">
+
+                    <i class="bi bi-calendar2-week display-3 text-muted"></i>
+
+                    <h5 class="fw-bold mt-3">
+                        No Rotation Schedule Yet
+                    </h5>
+
+                    <p class="text-muted mb-3">
+                        A rotation schedule has not been generated for this group.
+                        Once the group is active and has eligible members,
+                        the rotation schedule can be generated.
+                    </p>
+
+                    {% if is_admin %}
+
+                        <div class="alert alert-info border-0 rounded-3 d-inline-block text-start">
+
+                            <small>
+                                <i class="bi bi-info-circle me-2"></i>
+                                Contact the platform administrator to generate
+                                the rotation schedule.
+                            </small>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="d-flex flex-wrap gap-2 mt-4">
+
+        <a href="{% url 'savings:group_detail' group.pk %}"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-people me-2"></i>
+            Back to Group
+
+        </a>
+
+        <a href="{% url 'savings:payouts' group.pk %}"
+           class="btn btn-outline-primary">
+
+            <i class="bi bi-wallet2 me-2"></i>
+            View Payouts
+
+        </a>
+
+        <a href="{% url 'savings:contributions' group.pk %}"
+           class="btn btn-outline-primary">
+
+            <i class="bi bi-cash-stack me-2"></i>
+            View Contributions
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

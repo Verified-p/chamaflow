@@ -1,0 +1,323 @@
+
+{% extends "base.html" %}
+
+{% block title %}Payment History | ChamaFlow{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">Payment History</h2>
+
+            <p class="text-muted mb-0">
+                Track and review all your savings contributions.
+            </p>
+        </div>
+
+        <a href="{% url 'savings:dashboard' %}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Dashboard
+        </a>
+
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-2">Total Paid</p>
+
+                            <h3 class="fw-bold text-success mb-1">
+                                KSh {{ total_paid|default:0|floatformat:2 }}
+                            </h3>
+
+                            <small class="text-muted">
+                                Successfully verified payments
+                            </small>
+                        </div>
+
+                        <i class="bi bi-check-circle-fill text-success fs-2"></i>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-2">Pending Payments</p>
+
+                            <h3 class="fw-bold text-warning mb-1">
+                                KSh {{ total_pending|default:0|floatformat:2 }}
+                            </h3>
+
+                            <small class="text-muted">
+                                Awaiting payment confirmation
+                            </small>
+                        </div>
+
+                        <i class="bi bi-clock-history text-warning fs-2"></i>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-2">Failed Payments</p>
+
+                            <h3 class="fw-bold text-danger mb-1">
+                                KSh {{ total_failed|default:0|floatformat:2 }}
+                            </h3>
+
+                            <small class="text-muted">
+                                Failed or cancelled transactions
+                            </small>
+                        </div>
+
+                        <i class="bi bi-x-circle-fill text-danger fs-2"></i>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Transaction Records -->
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-header bg-white border-0 p-4">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                <div>
+                    <h5 class="fw-bold mb-1">My Transactions</h5>
+
+                    <p class="text-muted small mb-0">
+                        Your complete contribution payment records.
+                    </p>
+                </div>
+
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                    {{ contributions.count }} Transaction(s)
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if contributions %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="ps-4">#</th>
+                                <th>Savings Group</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Payment Date</th>
+                                <th>M-Pesa Receipt</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for contribution in contributions %}
+
+                                <tr>
+
+                                    <td class="ps-4">
+                                        {{ forloop.counter }}
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-semibold">
+                                            {{ contribution.group.name }}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            {{ contribution.group.get_contribution_frequency_display }}
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <span class="fw-semibold">
+                                            KSh {{ contribution.amount|floatformat:2 }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        {{ contribution.due_date|date:"d M Y" }}
+                                    </td>
+
+                                    <td>
+                                        {% if contribution.paid_at %}
+
+                                            <span class="text-success">
+                                                {{ contribution.paid_at|date:"d M Y, H:i" }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                Not paid
+                                            </span>
+
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if contribution.mpesa_receipt_number %}
+
+                                            <span class="badge bg-light text-dark border">
+                                                {{ contribution.mpesa_receipt_number }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="text-muted">—</span>
+
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+
+                                        {% if contribution.status == "paid" %}
+
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Paid
+                                            </span>
+
+                                        {% elif contribution.status == "processing" %}
+
+                                            <span class="badge bg-info text-dark">
+                                                Processing
+                                            </span>
+
+                                        {% elif contribution.status == "pending" %}
+
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+
+                                        {% elif contribution.status == "failed" %}
+
+                                            <span class="badge bg-danger">
+                                                Failed
+                                            </span>
+
+                                        {% elif contribution.status == "cancelled" %}
+
+                                            <span class="badge bg-secondary">
+                                                Cancelled
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-secondary">
+                                                {{ contribution.get_status_display }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <!-- Empty State -->
+                <div class="text-center py-5 px-3">
+
+                    <div class="mb-3">
+                        <i class="bi bi-wallet2 display-3 text-muted"></i>
+                    </div>
+
+                    <h5 class="fw-bold">No Payment History Yet</h5>
+
+                    <p class="text-muted mb-4">
+                        You have not submitted any contributions.
+                        Your payment records will appear here once you start contributing.
+                    </p>
+
+                    <a href="{% url 'savings:dashboard' %}"
+                       class="btn btn-primary px-4">
+                        <i class="bi bi-house me-2"></i>
+                        Go to Dashboard
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- Payment Verification Notice -->
+    <div class="alert alert-info border-0 rounded-4 mt-4">
+
+        <div class="d-flex gap-3">
+
+            <i class="bi bi-shield-check fs-4"></i>
+
+            <div>
+                <h6 class="fw-bold mb-1">Secure Payment Records</h6>
+
+                <p class="small mb-0">
+                    Only payments successfully verified through the M-Pesa
+                    callback are considered paid. Pending and processing
+                    transactions are not included in confirmed savings.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

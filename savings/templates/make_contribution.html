@@ -1,0 +1,286 @@
+
+{% extends "base.html" %}
+
+{% block title %}Make Contribution | ChamaFlow{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Page Header -->
+    <div class="mb-4">
+
+        <a href="{% url 'savings:contributions' group.pk %}"
+           class="text-decoration-none text-muted">
+            <i class="bi bi-arrow-left"></i> Back to Contributions
+        </a>
+
+        <h2 class="fw-bold mt-3 mb-1">Make a Contribution</h2>
+
+        <p class="text-muted">
+            Submit your contribution to {{ group.name }}.
+        </p>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Contribution Form -->
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+
+                        <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-wallet2 text-primary fs-3"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Contribution Details
+                            </h5>
+
+                            <small class="text-muted">
+                                Enter the required payment information.
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <!-- General Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Form Fields -->
+                        {% for field in form %}
+
+                            <div class="mb-4">
+
+                                <label for="{{ field.id_for_label }}"
+                                       class="form-label fw-semibold">
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <div class="form-text">
+                                        {{ field.help_text }}
+                                    </div>
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        {% endfor %}
+
+                        <!-- Payment Information -->
+                        <div class="alert alert-info border-0 rounded-3">
+
+                            <div class="d-flex gap-2">
+
+                                <i class="bi bi-info-circle-fill fs-5"></i>
+
+                                <div>
+                                    <strong>Payment Information</strong>
+
+                                    <p class="small mb-0 mt-1">
+                                        Your contribution will initially be
+                                        recorded as pending. Payment will only
+                                        be confirmed after successful M-Pesa
+                                        callback verification.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+
+                                <i class="bi bi-check-circle me-2"></i>
+                                Submit Contribution
+
+                            </button>
+
+                            <a href="{% url 'savings:contributions' group.pk %}"
+                               class="btn btn-outline-secondary px-4">
+
+                                Cancel
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Group Information -->
+        <div class="col-lg-5">
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        <i class="bi bi-people text-primary me-2"></i>
+                        Group Information
+                    </h5>
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">Group Name</small>
+
+                        <h6 class="fw-semibold mb-0">
+                            {{ group.name }}
+                        </h6>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">
+                            Required Contribution
+                        </small>
+
+                        <h3 class="fw-bold text-primary mb-0">
+                            KSh {{ group.contribution_amount|floatformat:2 }}
+                        </h3>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">
+                            Contribution Frequency
+                        </small>
+
+                        <h6 class="fw-semibold mb-0">
+                            {{ group.get_contribution_frequency_display }}
+                        </h6>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">Group Status</small>
+
+                        <div class="mt-1">
+
+                            {% if group.status == "active" %}
+
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
+
+                            {% elif group.status == "pending" %}
+
+                                <span class="badge bg-warning text-dark">
+                                    Pending Approval
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+                                    {{ group.get_status_display }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% if group.start_date %}
+
+                        <hr>
+
+                        <div class="mb-3">
+
+                            <small class="text-muted">Group Start Date</small>
+
+                            <h6 class="fw-semibold mb-0">
+                                {{ group.start_date|date:"d M Y" }}
+                            </h6>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- Payment Guidelines -->
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <div class="card-body p-4">
+
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-shield-check text-success me-2"></i>
+                        Payment Guidelines
+                    </h6>
+
+                    <ul class="list-unstyled small text-muted mb-0">
+
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Enter a valid M-Pesa phone number.
+                        </li>
+
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Pay the required group contribution amount.
+                        </li>
+
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Keep your M-Pesa transaction confirmation message.
+                        </li>
+
+                        <li>
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Wait for the system to verify your payment.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

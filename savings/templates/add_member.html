@@ -1,0 +1,212 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Add Member | ChamaFlow{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-9 col-lg-7">
+
+            <!-- Page Header -->
+            <div class="mb-4">
+
+                <a href="{% url 'savings:members' group.pk %}"
+                   class="text-decoration-none text-muted small">
+                    <i class="bi bi-arrow-left"></i> Back to Members
+                </a>
+
+                <h2 class="fw-bold mt-3 mb-1">Add Group Member</h2>
+
+                <p class="text-muted mb-0">
+                    Add an existing ChamaFlow user to your savings group.
+                </p>
+
+            </div>
+
+            <!-- Group Information -->
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center"
+                             style="width: 55px; height: 55px;">
+                            <i class="bi bi-people fs-3"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ group.name }}</h5>
+
+                            <p class="text-muted mb-1 small">
+                                {{ group.get_contribution_frequency_display }}
+                                contributions
+                            </p>
+
+                            <span class="badge bg-success">
+                                {{ group.get_status_display }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="row g-3">
+
+                        <div class="col-6">
+                            <small class="text-muted">Contribution Amount</small>
+                            <h5 class="fw-bold mb-0">
+                                KSh {{ group.contribution_amount|floatformat:2 }}
+                            </h5>
+                        </div>
+
+                        <div class="col-6">
+                            <small class="text-muted">Active Members</small>
+                            <h5 class="fw-bold mb-0">
+                                {{ group.memberships.count|default:"0" }}
+                            </h5>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% if group.status != 'active' %}
+
+                <div class="alert alert-warning border-0 shadow-sm">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Group not active.</strong>
+                    Members cannot be added until this group has been activated.
+                </div>
+
+            {% else %}
+
+                <!-- Add Member Form -->
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-person-plus text-primary"></i>
+                            Member Details
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        <p class="text-muted mb-4">
+                            Select an existing registered user to join
+                            <strong>{{ group.name }}</strong>.
+                        </p>
+
+                        <form method="POST">
+
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        <p class="mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% for field in form %}
+
+                                <div class="mb-3">
+
+                                    <label for="{{ field.id_for_label }}"
+                                           class="form-label fw-semibold">
+                                        {{ field.label }}
+                                    </label>
+
+                                    {{ field }}
+
+                                    {% if field.help_text %}
+                                        <div class="form-text text-muted">
+                                            {{ field.help_text }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% for error in field.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endfor %}
+
+                            <div class="alert alert-light border mt-4">
+                                <div class="d-flex gap-2">
+                                    <i class="bi bi-info-circle text-primary fs-5"></i>
+
+                                    <div>
+                                        <strong>Before adding a member</strong>
+                                        <p class="text-muted small mb-0">
+                                            Make sure you select the correct
+                                            ChamaFlow account. The selected user
+                                            will become an active member of this
+                                            savings group.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 mt-4">
+
+                                <button type="submit"
+                                        class="btn btn-primary">
+                                    <i class="bi bi-person-plus"></i>
+                                    Add Member
+                                </button>
+
+                                <a href="{% url 'savings:members' group.pk %}"
+                                   class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+            <!-- Information -->
+            <div class="alert alert-info border-0 mt-4 shadow-sm">
+
+                <div class="d-flex gap-2">
+                    <i class="bi bi-lightbulb fs-5"></i>
+
+                    <div>
+                        <strong>How membership works</strong>
+
+                        <ul class="small mb-0 mt-2">
+                            <li>Only registered ChamaFlow users can be added.</li>
+                            <li>A user already in this group cannot be added again.</li>
+                            <li>New members receive the ordinary member role.</li>
+                            <li>Only the group administrator can add members.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

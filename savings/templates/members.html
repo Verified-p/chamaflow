@@ -1,0 +1,291 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Group Members | ChamaFlow{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'savings:group_detail' group.pk %}"
+               class="text-decoration-none text-muted small">
+                <i class="bi bi-arrow-left"></i> Back to Group
+            </a>
+
+            <h2 class="fw-bold mt-2 mb-1">Group Members</h2>
+
+            <p class="text-muted mb-2">
+                Manage and view members of {{ group.name }}.
+            </p>
+
+            {% if group.status == 'active' %}
+                <span class="badge bg-success">Active Group</span>
+            {% elif group.status == 'pending' %}
+                <span class="badge bg-warning text-dark">Pending Approval</span>
+            {% elif group.status == 'completed' %}
+                <span class="badge bg-primary">Completed</span>
+            {% else %}
+                <span class="badge bg-secondary">
+                    {{ group.get_status_display }}
+                </span>
+            {% endif %}
+        </div>
+
+        {% if is_admin and group.status == 'active' %}
+            <a href="{% url 'savings:add_member' group.pk %}"
+               class="btn btn-primary mt-3 mt-md-0">
+                <i class="bi bi-person-plus"></i> Add Member
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Group Status Notice -->
+    {% if group.status == 'pending' %}
+        <div class="alert alert-warning border-0 shadow-sm">
+            <strong><i class="bi bi-hourglass-split"></i> Approval Pending</strong>
+            <p class="mb-0">
+                This group is awaiting approval from the ChamaFlow platform
+                administrator. Member management and contributions will become
+                available according to the group's activation status.
+            </p>
+        </div>
+    {% elif group.status == 'suspended' %}
+        <div class="alert alert-secondary border-0 shadow-sm">
+            <strong><i class="bi bi-pause-circle"></i> Group Suspended</strong>
+            <p class="mb-0">
+                This group is currently suspended.
+            </p>
+        </div>
+    {% elif group.status == 'completed' %}
+        <div class="alert alert-info border-0 shadow-sm">
+            <strong><i class="bi bi-check-circle"></i> Group Completed</strong>
+            <p class="mb-0">
+                This group's savings cycle has been completed.
+            </p>
+        </div>
+    {% endif %}
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Total Members</p>
+                            <h3 class="fw-bold mb-0">{{ members|length }}</h3>
+                            <small class="text-muted">Active memberships</small>
+                        </div>
+                        <i class="bi bi-people fs-2 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Group Contribution</p>
+                            <h3 class="fw-bold mb-0">
+                                KSh {{ group.contribution_amount|floatformat:2 }}
+                            </h3>
+                            <small class="text-muted">Per contribution cycle</small>
+                        </div>
+                        <i class="bi bi-cash-stack fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Contribution Frequency</p>
+                            <h3 class="fw-bold mb-0">
+                                {{ group.get_contribution_frequency_display }}
+                            </h3>
+                            <small class="text-muted">Group payment interval</small>
+                        </div>
+                        <i class="bi bi-calendar-week fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Members Table -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="fw-bold mb-0">All Group Members</h5>
+                <small class="text-muted">
+                    Members registered in {{ group.name }}
+                </small>
+            </div>
+
+            {% if is_admin and group.status == 'active' %}
+                <a href="{% url 'savings:add_member' group.pk %}"
+                   class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-person-plus"></i> Add Member
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="card-body">
+
+            {% if members %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Member</th>
+                                <th>Username</th>
+                                <th>Phone Number</th>
+                                <th>Role</th>
+                                <th>Joined On</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for membership in members %}
+                                <tr>
+
+                                    <td>{{ forloop.counter }}</td>
+
+                                    <!-- Member Profile -->
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+
+                                            {% if membership.user.profile_picture %}
+                                                <img
+                                                    src="{{ membership.user.profile_picture.url }}"
+                                                    alt="Profile picture"
+                                                    class="rounded-circle"
+                                                    width="40"
+                                                    height="40"
+                                                    style="object-fit: cover;"
+                                                >
+                                            {% else %}
+                                                <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center fw-bold"
+                                                     style="width: 40px; height: 40px;">
+                                                    {{ membership.user.first_name|first|upper|default:membership.user.username|first|upper }}
+                                                </div>
+                                            {% endif %}
+
+                                            <div>
+                                                <div class="fw-semibold">
+                                                    {{ membership.user.get_full_name|default:membership.user.username }}
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ membership.user.email|default:"No email provided" }}
+                                                </small>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>{{ membership.user.username }}</td>
+
+                                    <td>
+                                        {{ membership.user.phone_number|default:"Not provided" }}
+                                    </td>
+
+                                    <!-- Membership Role -->
+                                    <td>
+                                        {% if membership.role == 'admin' %}
+                                            <span class="badge bg-primary">
+                                                Group Admin
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                Member
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ membership.joined_at|date:"d M Y" }}
+                                    </td>
+
+                                    <!-- Membership Status -->
+                                    <td>
+                                        {% if membership.status == 'active' %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% elif membership.status == 'pending' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif membership.status == 'left' %}
+                                            <span class="badge bg-secondary">Left Group</span>
+                                        {% elif membership.status == 'removed' %}
+                                            <span class="badge bg-danger">Removed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                {{ membership.get_status_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-people fs-1 text-muted"></i>
+
+                    <h5 class="fw-bold mt-3">No Members Found</h5>
+
+                    <p class="text-muted">
+                        This savings group does not have any active members yet.
+                    </p>
+
+                    {% if is_admin and group.status == 'active' %}
+                        <a href="{% url 'savings:add_member' group.pk %}"
+                           class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i> Add First Member
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="d-flex flex-wrap gap-2 mt-4">
+
+        <a href="{% url 'savings:group_detail' group.pk %}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Group
+        </a>
+
+        <a href="{% url 'savings:contributions' group.pk %}"
+           class="btn btn-outline-primary">
+            <i class="bi bi-cash-stack"></i> View Contributions
+        </a>
+
+        {% if group.status == 'active' %}
+            <a href="{% url 'savings:rotation_schedule' group.pk %}"
+               class="btn btn-outline-primary">
+                <i class="bi bi-calendar3"></i> Rotation Schedule
+            </a>
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

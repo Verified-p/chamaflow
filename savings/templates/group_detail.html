@@ -1,0 +1,403 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{{ group.name }} | ChamaFlow{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'savings:dashboard' %}"
+               class="text-decoration-none text-muted small">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+
+            <h2 class="fw-bold mt-2 mb-1">{{ group.name }}</h2>
+
+            <p class="text-muted mb-2">
+                {{ group.description|default:"No group description provided." }}
+            </p>
+
+            {% if group.status == 'active' %}
+                <span class="badge bg-success">Active Group</span>
+            {% elif group.status == 'pending' %}
+                <span class="badge bg-warning text-dark">Pending Approval</span>
+            {% elif group.status == 'completed' %}
+                <span class="badge bg-primary">Completed</span>
+            {% else %}
+                <span class="badge bg-secondary">
+                    {{ group.get_status_display }}
+                </span>
+            {% endif %}
+        </div>
+
+        {% if is_admin and group.status == 'active' %}
+            <a href="{% url 'savings:add_member' group.pk %}"
+               class="btn btn-primary mt-3 mt-md-0">
+                <i class="bi bi-person-plus"></i> Add Member
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Group Status Information -->
+    {% if group.status == 'pending' %}
+        <div class="alert alert-warning border-0 shadow-sm">
+            <div class="d-flex gap-2">
+                <i class="bi bi-hourglass-split fs-5"></i>
+                <div>
+                    <strong>Awaiting Approval</strong>
+                    <p class="mb-0">
+                        This group has been created successfully and is waiting
+                        for approval from the ChamaFlow platform administrator.
+                        Contributions cannot begin until the group is activated.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% elif group.status == 'suspended' %}
+        <div class="alert alert-secondary border-0 shadow-sm">
+            <strong>Group Suspended</strong>
+            <p class="mb-0">
+                This group is currently suspended. Contributions are unavailable.
+            </p>
+        </div>
+    {% elif group.status == 'completed' %}
+        <div class="alert alert-info border-0 shadow-sm">
+            <strong>Group Completed</strong>
+            <p class="mb-0">
+                This savings group's rotation cycle has been completed.
+            </p>
+        </div>
+    {% endif %}
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Contribution Amount</p>
+                            <h4 class="fw-bold mb-1">
+                                KSh {{ group.contribution_amount|floatformat:2 }}
+                            </h4>
+                            <small class="text-muted">
+                                {{ group.get_contribution_frequency_display }}
+                            </small>
+                        </div>
+                        <i class="bi bi-wallet2 fs-2 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Total Members</p>
+                            <h4 class="fw-bold mb-1">{{ member_count }}</h4>
+                            <small class="text-muted">Active members</small>
+                        </div>
+                        <i class="bi bi-people fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Total Contributions</p>
+                            <h4 class="fw-bold mb-1">
+                                KSh {{ total_contributions|default:0|floatformat:2 }}
+                            </h4>
+                            <small class="text-muted">Successfully received</small>
+                        </div>
+                        <i class="bi bi-cash-stack fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Next Payout</p>
+
+                            {% if next_turn %}
+                                <h4 class="fw-bold mb-1">
+                                    {{ next_turn.scheduled_date|date:"d M Y" }}
+                                </h4>
+                                <small class="text-muted">
+                                    {{ next_turn.membership.user.get_full_name|default:next_turn.membership.user.username }}
+                                </small>
+                            {% else %}
+                                <h5 class="fw-bold mb-1">Not scheduled</h5>
+                                <small class="text-muted">No upcoming payout</small>
+                            {% endif %}
+                        </div>
+                        <i class="bi bi-calendar-check fs-2 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Group Information and Quick Actions -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">Group Information</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">Group Name</div>
+                        <div class="col-sm-7 fw-semibold">{{ group.name }}</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">Created By</div>
+                        <div class="col-sm-7 fw-semibold">
+                            {{ group.creator.get_full_name|default:group.creator.username }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">Contribution Amount</div>
+                        <div class="col-sm-7 fw-semibold">
+                            KSh {{ group.contribution_amount|floatformat:2 }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">Frequency</div>
+                        <div class="col-sm-7 fw-semibold">
+                            {{ group.get_contribution_frequency_display }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">Start Date</div>
+                        <div class="col-sm-7 fw-semibold">
+                            {{ group.start_date|date:"d M Y"|default:"Not specified" }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">End Date</div>
+                        <div class="col-sm-7 fw-semibold">
+                            {{ group.end_date|date:"d M Y"|default:"Not specified" }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-5 text-muted">Group Status</div>
+                        <div class="col-sm-7 fw-semibold">
+                            {{ group.get_status_display }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">Quick Actions</h5>
+                </div>
+
+                <div class="card-body d-grid gap-2">
+
+                    <a href="{% url 'savings:members' group.pk %}"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-people"></i> View Group Members
+                    </a>
+
+                    <a href="{% url 'savings:contributions' group.pk %}"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-cash-stack"></i> View Contributions
+                    </a>
+
+                    <a href="{% url 'savings:rotation_schedule' group.pk %}"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-calendar3"></i> View Rotation Schedule
+                    </a>
+
+                    <a href="{% url 'savings:payouts' group.pk %}"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-wallet"></i> View Payouts
+                    </a>
+
+                    {% if group.status == 'active' %}
+                        <a href="{% url 'savings:make_contribution' group.pk %}"
+                           class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Make Contribution
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary" disabled>
+                            <i class="bi bi-lock"></i> Contributions Unavailable
+                        </button>
+                    {% endif %}
+
+                    {% if is_admin and group.status == 'active' %}
+                        <a href="{% url 'savings:add_member' group.pk %}"
+                           class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i> Add New Member
+                        </a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Group Members -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Group Members</h5>
+
+            <a href="{% url 'savings:members' group.pk %}"
+               class="text-decoration-none small">
+                View All <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="card-body">
+
+            {% if members %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Member</th>
+                                <th>Phone Number</th>
+                                <th>Role</th>
+                                <th>Joined On</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for member in members|slice:":5" %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">
+                                            {{ member.user.get_full_name|default:member.user.username }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {{ member.user.phone_number|default:"Not provided" }}
+                                    </td>
+
+                                    <td>
+                                        {% if member.role == 'admin' %}
+                                            <span class="badge bg-primary">Group Admin</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Member</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ member.joined_at|date:"d M Y" }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+                {% if member_count > 5 %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'savings:members' group.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            View All {{ member_count }} Members
+                        </a>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-people fs-1 text-muted"></i>
+                    <p class="text-muted mt-2 mb-0">
+                        No active members have joined this group yet.
+                    </p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Next Rotation Turn -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Next Rotation Turn</h5>
+
+            <a href="{% url 'savings:rotation_schedule' group.pk %}"
+               class="text-decoration-none small">
+                Full Schedule <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="card-body">
+
+            {% if next_turn %}
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+                        <p class="text-muted mb-1">Upcoming Recipient</p>
+
+                        <h5 class="fw-bold">
+                            {{ next_turn.membership.user.get_full_name|default:next_turn.membership.user.username }}
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-calendar-event"></i>
+                            Scheduled for {{ next_turn.scheduled_date|date:"d M Y" }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <p class="text-muted mb-1">Expected Payout</p>
+
+                        <h4 class="fw-bold text-success">
+                            KSh {{ next_turn.expected_amount|floatformat:2 }}
+                        </h4>
+                    </div>
+
+                </div>
+
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                    <p class="text-muted mt-2 mb-0">
+                        No rotation schedule has been generated for this group yet.
+                    </p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

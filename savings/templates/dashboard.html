@@ -1,0 +1,550 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | ChamaFlow{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4 px-lg-4">
+
+    <!-- Dashboard Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">Dashboard</h2>
+
+            <p class="text-muted mb-0">
+                Welcome back,
+                {{ request.user.first_name|default:request.user.username }}!
+                Here's your savings overview.
+            </p>
+        </div>
+
+        <a href="{% url 'savings:create_group' %}"
+           class="btn btn-primary px-4 py-2">
+            <i class="bi bi-plus-circle me-2"></i>
+            Create Savings Group
+        </a>
+
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <!-- My Groups -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">My Groups</p>
+                            <h3 class="fw-bold mb-1">
+                                {{ groups|length }}
+                            </h3>
+                            <small class="text-muted">Group memberships</small>
+                        </div>
+
+                        <div class="rounded-3 bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-people text-primary fs-4"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Contributions -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Total Contributions</p>
+                            <h3 class="fw-bold mb-1">
+                                KSh {{ total_contributions|default:0|floatformat:2 }}
+                            </h3>
+                            <small class="text-muted">Successfully paid</small>
+                        </div>
+
+                        <div class="rounded-3 bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-wallet2 text-success fs-4"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Turns -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Upcoming Turns</p>
+                            <h3 class="fw-bold mb-1">
+                                {{ upcoming_turns|length }}
+                            </h3>
+                            <small class="text-muted">Scheduled rotation turns</small>
+                        </div>
+
+                        <div class="rounded-3 bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-check text-warning fs-4"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Notifications</p>
+                            <h3 class="fw-bold mb-1">
+                                {{ unread_notifications|default:0 }}
+                            </h3>
+                            <small class="text-muted">Unread messages</small>
+                        </div>
+
+                        <div class="rounded-3 bg-info bg-opacity-10 p-3">
+                            <i class="bi bi-bell text-info fs-4"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- My Savings Groups -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-header bg-white border-0 p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                <div>
+                    <h5 class="fw-bold mb-1">My Savings Groups</h5>
+                    <p class="text-muted small mb-0">
+                        Manage your savings groups and memberships.
+                    </p>
+                </div>
+
+                <a href="{% url 'savings:create_group' %}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Create Group
+                </a>
+
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
+            {% if groups %}
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Group Name</th>
+                                <th>Contribution</th>
+                                <th>Frequency</th>
+                                <th>My Role</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for membership in groups %}
+
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">
+                                            {{ membership.group.name }}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            Joined {{ membership.joined_at|date:"d M Y" }}
+                                        </small>
+                                    </td>
+
+                                    <td class="fw-semibold">
+                                        KSh {{ membership.group.contribution_amount|floatformat:2 }}
+                                    </td>
+
+                                    <td>
+                                        {{ membership.group.get_contribution_frequency_display }}
+                                    </td>
+
+                                    <td>
+                                        {% if membership.role == "admin" %}
+                                            <span class="badge bg-primary">
+                                                Group Admin
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark">
+                                                Member
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if membership.group.status == "active" %}
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+
+                                        {% elif membership.group.status == "pending" %}
+                                            <span class="badge bg-warning text-dark">
+                                                Awaiting Approval
+                                            </span>
+
+                                        {% elif membership.group.status == "completed" %}
+                                            <span class="badge bg-primary">
+                                                Completed
+                                            </span>
+
+                                        {% elif membership.group.status == "suspended" %}
+                                            <span class="badge bg-danger">
+                                                Suspended
+                                            </span>
+
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                {{ membership.group.get_status_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <a href="{% url 'savings:group_detail' pk=membership.group.pk %}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            View Group
+                                            <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <div class="mb-3">
+                        <i class="bi bi-people text-muted" style="font-size: 50px;"></i>
+                    </div>
+
+                    <h5 class="fw-bold">No Savings Groups Yet</h5>
+
+                    <p class="text-muted">
+                        You haven't joined or created any savings groups.
+                        Create your first group to get started.
+                    </p>
+
+                    <a href="{% url 'savings:create_group' %}"
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Create Your First Group
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Recent Contributions and Upcoming Payouts -->
+    <div class="row g-4">
+
+        <!-- Recent Contributions -->
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-header bg-white border-0 p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Recent Contributions</h5>
+                            <small class="text-muted">
+                                Your latest contribution records.
+                            </small>
+                        </div>
+
+                        <a href="{% url 'savings:payment_history' %}"
+                           class="text-decoration-none small fw-semibold">
+                            View History
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    {% if recent_contributions %}
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle">
+
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Group</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {% for contribution in recent_contributions %}
+
+                                        <tr>
+
+                                            <td class="fw-semibold">
+                                                {{ contribution.group.name }}
+                                            </td>
+
+                                            <td>
+                                                KSh {{ contribution.amount|floatformat:2 }}
+                                            </td>
+
+                                            <td>
+                                                {{ contribution.created_at|date:"d M Y" }}
+                                            </td>
+
+                                            <td>
+
+                                                {% if contribution.status == "paid" %}
+                                                    <span class="badge bg-success">
+                                                        Paid
+                                                    </span>
+
+                                                {% elif contribution.status == "processing" %}
+                                                    <span class="badge bg-info text-dark">
+                                                        Processing
+                                                    </span>
+
+                                                {% elif contribution.status == "pending" %}
+                                                    <span class="badge bg-warning text-dark">
+                                                        Pending
+                                                    </span>
+
+                                                {% elif contribution.status == "failed" %}
+                                                    <span class="badge bg-danger">
+                                                        Failed
+                                                    </span>
+
+                                                {% elif contribution.status == "cancelled" %}
+                                                    <span class="badge bg-secondary">
+                                                        Cancelled
+                                                    </span>
+
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        {{ contribution.get_status_display }}
+                                                    </span>
+                                                {% endif %}
+
+                                            </td>
+
+                                        </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="text-center py-5">
+
+                            <i class="bi bi-wallet2 text-muted fs-1"></i>
+
+                            <p class="text-muted mt-3 mb-0">
+                                No contributions recorded yet.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Upcoming Payouts -->
+        <div class="col-lg-5">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-header bg-white border-0 p-4">
+
+                    <h5 class="fw-bold mb-1">Upcoming Payouts</h5>
+
+                    <small class="text-muted">
+                        Your group's scheduled rotation turns.
+                    </small>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    {% if upcoming_turns %}
+
+                        {% for turn in upcoming_turns %}
+
+                            <div class="border-bottom py-3">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <strong>
+                                        {{ turn.group.name }}
+                                    </strong>
+
+                                    <span class="badge bg-light text-dark">
+                                        Turn {{ turn.turn_number }}
+                                    </span>
+
+                                </div>
+
+                                <p class="text-muted small mb-2">
+                                    Recipient:
+                                    {{ turn.membership.user.get_full_name|default:turn.membership.user.username }}
+                                </p>
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <strong class="text-primary">
+                                        KSh {{ turn.expected_amount|floatformat:2 }}
+                                    </strong>
+
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        {{ turn.scheduled_date|date:"d M Y" }}
+                                    </small>
+
+                                </div>
+
+                                <a href="{% url 'savings:rotation_schedule' pk=turn.group.pk %}"
+                                   class="small text-decoration-none mt-2 d-inline-block">
+                                    View Rotation Schedule
+                                </a>
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="text-center py-5">
+
+                            <i class="bi bi-calendar-check text-muted fs-1"></i>
+
+                            <p class="text-muted mt-3 mb-0">
+                                No upcoming rotation turns available.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Latest Notifications -->
+    {% if latest_notifications %}
+
+        <div class="card border-0 shadow-sm rounded-4 mt-4">
+
+            <div class="card-header bg-white border-0 p-4">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <h5 class="fw-bold mb-0">Latest Notifications</h5>
+
+                    <a href="{% url 'savings:notifications' %}"
+                       class="text-decoration-none small">
+                        View All
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="card-body p-4">
+
+                {% for notification in latest_notifications %}
+
+                    <div class="d-flex align-items-start gap-3 py-3 border-bottom">
+
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-2">
+                            <i class="bi bi-bell text-primary"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <h6 class="fw-semibold mb-1">
+                                {{ notification.title }}
+                            </h6>
+
+                            <p class="text-muted small mb-1">
+                                {{ notification.message }}
+                            </p>
+
+                            <small class="text-muted">
+                                {{ notification.created_at|date:"d M Y, H:i" }}
+                            </small>
+
+                        </div>
+
+                        {% if not notification.is_read %}
+                            <span class="badge bg-primary">New</span>
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

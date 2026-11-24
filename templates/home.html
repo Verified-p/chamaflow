@@ -1,0 +1,386 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Home | ChamaFlow{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="container py-5">
+
+    <div class="row align-items-center py-5">
+
+        <div class="col-lg-7">
+
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 mb-3">
+                Welcome to ChamaFlow
+            </span>
+
+            <h1 class="display-4 fw-bold mb-3">
+                Save Together.
+                <span class="text-primary">Grow Together.</span>
+            </h1>
+
+            <p class="lead text-muted mb-4">
+                ChamaFlow simplifies group savings by helping members
+                organize contributions, monitor payments and manage
+                rotating payouts transparently.
+            </p>
+
+            {% if user.is_authenticated %}
+
+                <h5 class="mb-3">
+                    Welcome back, {{ user.first_name|default:user.username }}!
+                </h5>
+
+                <a href="{% url 'savings:dashboard' %}"
+                   class="btn btn-primary btn-lg me-2 mb-2">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Go to Dashboard
+                </a>
+
+                <a href="{% url 'accounts:profile' %}"
+                   class="btn btn-outline-primary btn-lg mb-2">
+                    My Profile
+                </a>
+
+            {% else %}
+
+                <a href="{% url 'accounts:register' %}"
+                   class="btn btn-primary btn-lg me-2 mb-2">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Get Started
+                </a>
+
+                <a href="{% url 'accounts:login' %}"
+                   class="btn btn-outline-primary btn-lg mb-2">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Login
+                </a>
+
+            {% endif %}
+
+            <div class="d-flex flex-wrap gap-4 mt-4 text-muted small">
+
+                <span>
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    Organized Savings
+                </span>
+
+                <span>
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    Transparent Records
+                </span>
+
+                <span>
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    Group Management
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- Hero Information Card -->
+        <div class="col-lg-5 mt-5 mt-lg-0">
+
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="text-center mb-4">
+                        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center"
+                             style="width: 75px; height: 75px;">
+                            <i class="bi bi-piggy-bank display-5"></i>
+                        </div>
+
+                        <h4 class="fw-bold mt-3">Smarter Group Savings</h4>
+
+                        <p class="text-muted small">
+                            Everything your savings group needs in one place.
+                        </p>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-success-subtle text-success rounded-3 p-3">
+                            <i class="bi bi-people fs-4"></i>
+                        </div>
+
+                        <div>
+                            <h6 class="fw-bold mb-1">Manage Members</h6>
+                            <small class="text-muted">
+                                Organize your savings group members.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-primary-subtle text-primary rounded-3 p-3">
+                            <i class="bi bi-wallet2 fs-4"></i>
+                        </div>
+
+                        <div>
+                            <h6 class="fw-bold mb-1">Track Contributions</h6>
+                            <small class="text-muted">
+                                Monitor payments and contribution records.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning-subtle text-warning rounded-3 p-3">
+                            <i class="bi bi-arrow-repeat fs-4"></i>
+                        </div>
+
+                        <div>
+                            <h6 class="fw-bold mb-1">Manage Rotations</h6>
+                            <small class="text-muted">
+                                Follow the group's payout schedule.
+                            </small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Features Section -->
+<section class="bg-light py-5">
+
+    <div class="container py-4">
+
+        <div class="text-center mb-5">
+
+            <span class="text-primary fw-semibold">OUR FEATURES</span>
+
+            <h2 class="fw-bold mt-2">
+                Everything Your Chama Needs
+            </h2>
+
+            <p class="text-muted">
+                Manage your group's savings activities with greater organization.
+            </p>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+
+                        <i class="bi bi-people-fill text-primary display-5"></i>
+
+                        <h5 class="fw-bold mt-3">Group Management</h5>
+
+                        <p class="text-muted mb-0">
+                            Create savings groups, organize members and
+                            manage group activities from one place.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+
+                        <i class="bi bi-cash-stack text-success display-5"></i>
+
+                        <h5 class="fw-bold mt-3">Contribution Tracking</h5>
+
+                        <p class="text-muted mb-0">
+                            Keep records of member contributions, payment
+                            statuses and transaction history.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+
+                        <i class="bi bi-arrow-repeat text-warning display-5"></i>
+
+                        <h5 class="fw-bold mt-3">Rotation Schedules</h5>
+
+                        <p class="text-muted mb-0">
+                            Organize payout turns and help members
+                            understand when they are scheduled to receive.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+
+                        <i class="bi bi-phone text-primary display-5"></i>
+
+                        <h5 class="fw-bold mt-3">M-Pesa Integration</h5>
+
+                        <p class="text-muted mb-0">
+                            Support convenient contribution payments
+                            through M-Pesa when payment integration is enabled.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+
+                        <i class="bi bi-graph-up-arrow text-success display-5"></i>
+
+                        <h5 class="fw-bold mt-3">Financial Records</h5>
+
+                        <p class="text-muted mb-0">
+                            View contribution summaries, payment history
+                            and payout records.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+
+                        <i class="bi bi-bell text-danger display-5"></i>
+
+                        <h5 class="fw-bold mt-3">Notifications</h5>
+
+                        <p class="text-muted mb-0">
+                            Receive updates about contributions,
+                            group activities and important reminders.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- How It Works -->
+<section class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <span class="text-primary fw-semibold">HOW IT WORKS</span>
+
+        <h2 class="fw-bold mt-2">
+            Start Saving in Three Steps
+        </h2>
+
+        <p class="text-muted">
+            A simple process for organizing your group's savings.
+        </p>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-4 text-center">
+
+            <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center"
+                 style="width: 75px; height: 75px;">
+                <i class="bi bi-person-plus fs-2"></i>
+            </div>
+
+            <h5 class="fw-bold mt-3">1. Create an Account</h5>
+
+            <p class="text-muted">
+                Register on ChamaFlow and set up your personal profile.
+            </p>
+
+        </div>
+
+        <div class="col-md-4 text-center">
+
+            <div class="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center"
+                 style="width: 75px; height: 75px;">
+                <i class="bi bi-people fs-2"></i>
+            </div>
+
+            <h5 class="fw-bold mt-3">2. Join or Create a Group</h5>
+
+            <p class="text-muted">
+                Create a savings group or become a member of an existing one.
+            </p>
+
+        </div>
+
+        <div class="col-md-4 text-center">
+
+            <div class="bg-warning-subtle text-warning rounded-circle d-inline-flex align-items-center justify-content-center"
+                 style="width: 75px; height: 75px;">
+                <i class="bi bi-piggy-bank fs-2"></i>
+            </div>
+
+            <h5 class="fw-bold mt-3">3. Save and Receive</h5>
+
+            <p class="text-muted">
+                Make contributions and follow your group's agreed payout rotation.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Final Call to Action -->
+<section class="container pb-5">
+
+    <div class="bg-primary text-white rounded-4 p-4 p-md-5 text-center">
+
+        <h2 class="fw-bold">
+            Ready to Manage Your Savings Better?
+        </h2>
+
+        <p class="mb-4">
+            Start organizing your group savings with ChamaFlow today.
+        </p>
+
+        {% if user.is_authenticated %}
+
+            <a href="{% url 'savings:dashboard' %}"
+               class="btn btn-light btn-lg text-primary">
+                Go to Dashboard
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+
+        {% else %}
+
+            <a href="{% url 'accounts:register' %}"
+               class="btn btn-light btn-lg text-primary">
+                Create Your Account
+                <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}
